@@ -27,6 +27,7 @@ docs/
   03-headroom.md         GSM8K 可学空间
   04-difficulty.md       难度分层与评测功效
   05-code-dataset.md     TACO 数据集构建
+  06-code-reward.md      代码奖励函数（dense）+ 显存瓶颈
 ```
 
 代码平铺在根目录——`taco_lib.py` 通过 `Path(__file__).parent` 定位

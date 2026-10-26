@@ -31,3 +31,9 @@ hf-cache/
 __pycache__/
 *.pyc
 scratch/
+
+# TensorBoard 事件文件（文件名含主机名）
+**/events.out.tfevents.*
+
+# veRL parquet（由 prepare_code_data.py 生成）
+data/verl/
