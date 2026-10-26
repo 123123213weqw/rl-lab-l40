@@ -1,0 +1,33 @@
+# 大体积数据（可重新生成）
+data/taco_pool.jsonl
+data/gsm8k_neutral.jsonl
+data/math500.jsonl
+data/arc.jsonl
+data/aime2024.jsonl
+data/train_code.jsonl
+
+# 中间结果
+results/*.json
+!results/*.stats.json
+results/shards/
+results/probe/
+results/*.log
+
+# 运行产物
+*.log
+probe-noffload*/
+grpo_out/
+runs/
+outputs/
+ppo_cartpole.zip
+
+# 环境
+.venv/
+.venv-llm/
+.tools/
+hf-cache/
+
+# Python
+__pycache__/
+*.pyc
+scratch/

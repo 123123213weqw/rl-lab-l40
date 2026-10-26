@@ -1,0 +1,73 @@
+{
+  "total": 14498,
+  "valid": 9419,
+  "by_source": {
+    "codeforces": [
+      4793,
+      6146
+    ],
+    "hackerrank": [
+      745,
+      801
+    ],
+    "codechef": [
+      1797,
+      3195
+    ],
+    "hackerearth": [
+      170,
+      765
+    ],
+    "aizu": [
+      963,
+      1397
+    ],
+    "geeksforgeeks": [
+      1,
+      980
+    ],
+    "atcoder": [
+      950,
+      1208
+    ],
+    "leetcode": [
+      0,
+      5
+    ],
+    "kattis": [
+      0,
+      1
+    ]
+  },
+  "by_difficulty": {
+    "HARD": [
+      1296,
+      1879
+    ],
+    "VERY_HARD": [
+      588,
+      951
+    ],
+    "MEDIUM_HARD": [
+      1610,
+      2170
+    ],
+    "EASY": [
+      3241,
+      4621
+    ],
+    "MEDIUM": [
+      1189,
+      1798
+    ],
+    "UNKNOWN_DIFFICULTY": [
+      1495,
+      3079
+    ]
+  },
+  "skipped": {
+    "no_tests": 2131,
+    "no_python_gold": 9814
+  },
+  "seconds": 285.4
+}

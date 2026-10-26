@@ -1,0 +1,38 @@
+{
+  "train": {
+    "n": 0,
+    "zero_var_G8": 0.0,
+    "by_difficulty": {},
+    "by_source": {}
+  },
+  "eval": {
+    "n": 328,
+    "zero_var_G8": 0.0855,
+    "mde": 0.0691,
+    "by_difficulty": {
+      "MEDIUM": 39,
+      "HARD": 33,
+      "VERY_HARD": 19,
+      "MEDIUM_HARD": 53,
+      "EASY": 136,
+      "UNKNOWN_DIFFICULTY": 48
+    },
+    "by_source": {
+      "codeforces": 137,
+      "codechef": 96,
+      "aizu": 38,
+      "atcoder": 24,
+      "hackerrank": 33
+    }
+  },
+  "thresholds": {
+    "train": [
+      0.1,
+      0.9
+    ],
+    "eval": [
+      0.2,
+      0.8
+    ]
+  }
+}

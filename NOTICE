@@ -1,0 +1,16 @@
+rl-lab
+Copyright 2026 wangyue
+
+This product includes problem statements, reference solutions and test cases
+derived from the TACO dataset:
+
+    BAAI/TACO -- https://huggingface.co/datasets/BAAI/TACO
+    Licensed under the Apache License, Version 2.0.
+
+The TACO data was filtered by re-executing its reference solutions and keeping
+only problems whose tests a reference solution passes in full (65.0% of
+candidates). Problem statements, solutions and test cases remain subject to
+their original licenses and attribution requirements.
+
+Model outputs in `results/` were produced by Qwen/Qwen3-8B
+(https://huggingface.co/Qwen/Qwen3-8B, Apache License 2.0).
