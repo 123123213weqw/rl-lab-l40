@@ -21,8 +21,13 @@ def load_pool():
             (json.loads(l) for l in POOL.read_text().split("\n") if l.strip())}
 
 
+def raw_p(r):
+    """原始通过比例。用于判断饱和——必须保留 0 和 1 这两个端点。"""
+    return r["correct"] / r["n"] if r["n"] else 0.0
+
+
 def lap(r):
-    """Laplace 平滑的 pass rate 估计，避免 0/4 被当成 p=0。"""
+    """Laplace 平滑，仅用于保留题的统计估计，不用于过滤判断。"""
     return (r["correct"] + 1) / (r["n"] + 2)
 
 
@@ -41,8 +46,8 @@ def main():
     ap.add_argument("--eval-passrate", default=str(ROOT / "results/code_eval_passrate.json"))
     ap.add_argument("--train-lo", type=float, default=0.10)
     ap.add_argument("--train-hi", type=float, default=0.90)
-    ap.add_argument("--eval-lo", type=float, default=0.20)
-    ap.add_argument("--eval-hi", type=float, default=0.80)
+    ap.add_argument("--eval-lo", type=float, default=0.125)
+    ap.add_argument("--eval-hi", type=float, default=0.875)
     ap.add_argument("--outdir", default=str(ROOT / "data"))
     args = ap.parse_args()
 
@@ -57,20 +62,26 @@ def main():
         for r in recs:
             if r["idx"] not in pool:
                 continue
-            pr = lap(r)
+            pr = raw_p(r)
             if lo <= pr <= hi and pool[r["idx"]]["split"] == must_split:
                 item = dict(pool[r["idx"]])
-                item["pass_rate"] = round(pr, 4)
+                item["raw_p"] = pr
+                item["pass_rate"] = round(lap(r), 4)
                 item["n_samples"] = r["n"]
                 out.append(item)
         return out
 
-    train = select(tr, args.train_lo, args.train_hi, "train")
+    # 训练集严格剔除全对/全错：这些题在 GRPO 里产生零优势
+    train_all = select(tr, 0.0, 1.0, "train")
+    train = [x for x in train_all if 0.0 < x["raw_p"] < 1.0]
+    print("训练集: 候选 %d，剔除全对/全错后 %d 题"
+          % (len(train_all), len(train)))
 
-    # 评测集从 eval+dev 两半里取，用更窄的带
+    # 评测集：用原始比例带 [eval_lo, eval_hi]，不额外剔除端点以外
+    # 但保留 raw_p 在 (0,1) 开区间内的题，其余（全对/全错）无测量价值
     ev_sel = []
     for want in ("eval", "dev"):
-        ev_sel += select(ev, args.eval_lo, args.eval_hi, want)
+        ev_sel += [x for x in select(ev, args.eval_lo, args.eval_hi, want)]
 
     for name, sel in (("训练集", train), ("评测基准", ev_sel)):
         print()

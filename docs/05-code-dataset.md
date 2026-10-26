@@ -148,6 +148,54 @@ prlimit: cpu / as / nproc / nofile / fsize / core
 两头都错，但方向相反。代码集合有真实 headroom（22% → 有大量提升空间），
 代价是需要难度过滤。
 
+## 最终数据集
+
+过滤后（`build_splits.py`）：
+
+| | 题数 | pass rate | G=8 零方差 | MDE |
+|---|---|---|---|---|
+| **训练集** | **1,333** | 0.468 | **3.0%**（有效组 97.0%） | — |
+| **评测基准** | **326** | 0.421 | 8.5%（有效组 91.5%） | **2.4pp**（8 采样） |
+
+训练集难度：EASY 500 / MEDIUM_HARD 251 / MEDIUM 194 / UNKNOWN 196 /
+HARD 132 / VERY_HARD 60
+训练集来源：codeforces 559 / codechef 358 / hackerrank 157 / aizu 143 / atcoder 116
+
+### 训练集从 7,784 缩到 1,333 的原因
+
+原始 pass@1 只有 **24.88%**，且两端极重：
+
+```
+0/4 : 5116 (65.7%)   ← 全错，零优势
+1/4 :  602 ( 7.7%)
+2/4 :  388 ( 5.0%)
+3/4 :  343 ( 4.4%)
+4/4 : 1335 (17.2%)   ← 全对，零优势
+```
+
+只有 **1,333 题（17.1%）** 有分化。剔除全对/全错后正好是这个数。
+
+**一个必须记下的坑**：过滤不能用 Laplace 平滑值。
+n=4 时 `(k+1)/(n+2)` 只能产生 {0.167, 0.333, 0.5, 0.667, 0.833} 五个值，
+全部落在 [0.10, 0.90] 内，过滤器会**完全失效**（第一版就是这样，7,784 题
+一题没滤掉）。必须用原始比例 `k/n` 判断饱和，平滑值只用于保留题的统计估计。
+
+### 泄漏检查
+
+哈希切分拦不住措辞变体：复查发现 2 道题题干重叠（`taco_11635`、
+`taco_15249`），已剔除。最终 train/eval 题干交集 = 0，id 交集 = 0。
+
+### 为什么评测基准用「多次采样的 pass rate」而非二元 pass@1
+
+```
+326 题，二元 pass@1      → MDE 6.9pp
+326 题，pass rate（8采样）→ MDE 2.4pp   ← 采用
+```
+
+题库只有 326 题时，二元口径测不出 5pp 以内的改进；改用多次采样的平均
+pass rate，等价于把题量放大 8 倍。对比 MATH-500（5.6pp）、AIME（22.9pp）。
+
+
 ## 复现
 
 ```bash
@@ -178,6 +226,10 @@ $VLLM_PY grade_candidates.py \
 | `data/taco_pool.jsonl` | 9,169 题，已去重、已切分 |
 | `results/code_probe.json` | 80 题 × 4 采样的 pass rate |
 | `results/code_eval_passrate.json` | 1,385 题 × 8 采样的 pass rate |
+| `results/train_passrate.json` | 7,784 题 × 4 采样的 pass rate |
+| `data/train_code.jsonl` | **训练集 1,333 题**（无 gold） |
+| `data/eval_code.jsonl` | **评测基准 326 题**（含 gold） |
+| `data/code_dataset_stats.json` | 数据集统计与 MDE |
 
 ## 下一步
 

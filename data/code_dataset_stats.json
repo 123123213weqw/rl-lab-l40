@@ -1,14 +1,27 @@
 {
   "train": {
-    "n": 0,
-    "zero_var_G8": 0.0,
-    "by_difficulty": {},
-    "by_source": {}
+    "n": 1333,
+    "zero_var_G8": 0.0301,
+    "by_difficulty": {
+      "MEDIUM_HARD": 251,
+      "MEDIUM": 194,
+      "HARD": 132,
+      "VERY_HARD": 60,
+      "EASY": 500,
+      "UNKNOWN_DIFFICULTY": 196
+    },
+    "by_source": {
+      "hackerrank": 157,
+      "codeforces": 559,
+      "codechef": 358,
+      "atcoder": 116,
+      "aizu": 143
+    }
   },
   "eval": {
-    "n": 328,
-    "zero_var_G8": 0.0855,
-    "mde": 0.0691,
+    "n": 326,
+    "zero_var_G8": 0.0856,
+    "mde": 0.0694,
     "by_difficulty": {
       "MEDIUM": 39,
       "HARD": 33,
@@ -31,8 +44,12 @@
       0.9
     ],
     "eval": [
-      0.2,
-      0.8
+      0.125,
+      0.875
     ]
+  },
+  "leakage_check": {
+    "question_overlap_removed": 2,
+    "id_overlap": 0
   }
 }
