@@ -29,8 +29,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
-DEFAULT_VERL = Path("/data1/wangyue/experiments/rl-grpo8b-baseline-20261016/vendor/verl")
-DEFAULT_MODEL = Path("/data1/wangyue/experiments/rl-grpo8b-baseline-20261016/execution/20261017/model")
+# 用环境变量指定，避免把本机路径写进仓库
+#   GRPO_BASELINE=/path/to/grpo-baseline
+_BASE = os.environ.get("GRPO_BASELINE", "")
+DEFAULT_VERL = Path(_BASE) / "vendor/verl" if _BASE else Path("/nonexistent/vendor/verl")
+DEFAULT_MODEL = Path(_BASE) / "execution/20261017/model" if _BASE else Path("/nonexistent/model")
 
 # 已验证的提速配置：关 offload 后 920s -> 247s/step，MFU 0.40% -> 1.88%
 FAST_FSDP = {
@@ -42,7 +45,7 @@ FAST_FSDP = {
 def build(
     verl_root, model, train_file, val_file, out_dir,
     gpus, steps, group_size, batch_size, micro_batch,
-    lr, kl_coef, temperature, max_tokens, seed, reward_workers, smoke,
+    lr, kl_coef, temperature, max_tokens, seed, reward_workers, smoke, save_freq,
 ):
     python = str(verl_root / ".venv/bin/python")
 
@@ -65,6 +68,10 @@ def build(
         "data.truncation": "error",
         "data.dataloader_num_workers": 0,
         "data.seed": seed,
+        # 必须显式关闭 thinking：Qwen3 系列 chat template 默认开启，
+        # 打开时思考过程会吃掉全部 response 预算，代码写不完 ->
+        # 全部截断 -> 奖励恒为 0。baseline 一直是这么设的。
+        "+data.apply_chat_template_kwargs.enable_thinking": False,
 
         # ---- 模型 ----
         "actor_rollout_ref.model.path": str(model),
@@ -136,7 +143,7 @@ def build(
         "trainer.n_gpus_per_node": len(gpus),
         "trainer.total_epochs": 1,
         "trainer.total_training_steps": 1 if smoke else steps,
-        "trainer.save_freq": -1,
+        "trainer.save_freq": -1 if smoke else save_freq,
         "trainer.test_freq": -1,
         "trainer.val_before_train": False,
         "trainer.resume_mode": "disable",
@@ -186,9 +193,10 @@ def main():
     ap.add_argument("--lr", type=float, default=1e-6)
     ap.add_argument("--kl-coef", type=float, default=0.001)
     ap.add_argument("--temperature", type=float, default=1.0)
-    ap.add_argument("--max-tokens", type=int, default=2048)
+    ap.add_argument("--max-tokens", type=int, default=6144)
     ap.add_argument("--seed", type=int, default=311)
     ap.add_argument("--reward-workers", type=int, default=2)
+    ap.add_argument("--save-freq", type=int, default=6)
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="只打印命令")
     args = ap.parse_args()
@@ -205,7 +213,7 @@ def main():
         verl_root, Path(args.model), Path(args.train), Path(args.val), out,
         args.gpus.split(","), args.steps, args.group_size, args.batch_size,
         args.micro_batch, args.lr, args.kl_coef, args.temperature,
-        args.max_tokens, args.seed, args.reward_workers, args.smoke,
+        args.max_tokens, args.seed, args.reward_workers, args.smoke, args.save_freq,
     )
 
     print("奖励模式:", env["CODE_REWARD_MODE"],

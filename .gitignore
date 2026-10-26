@@ -37,3 +37,6 @@ scratch/
 
 # veRL parquet（由 prepare_code_data.py 生成）
 data/verl/
+
+# 合并出的 HF 权重（16G/份，可重新生成）
+merged/

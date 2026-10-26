@@ -28,6 +28,9 @@ docs/
   04-difficulty.md       难度分层与评测功效
   05-code-dataset.md     TACO 数据集构建
   06-code-reward.md      代码奖励函数（dense）+ 显存瓶颈
+  07-eight-gpu.md        8 卡可行但不稳定（修正显存算错）
+  08-thinking-root-cause.md  截断真凶：漏了 enable_thinking=False
+  09-first-real-run.md   4 卡 12 步真实训练：+0.91pp 不显著
 ```
 
 代码平铺在根目录——`taco_lib.py` 通过 `Path(__file__).parent` 定位
