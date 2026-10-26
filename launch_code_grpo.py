@@ -52,23 +52,31 @@ def build(
         "algorithm.use_kl_in_reward": False,          # KL 放在 loss 里
         "algorithm.kl_ctrl.kl_coef": kl_coef,
         "algorithm.filter_groups.enable": False,
+        "algorithm.norm_adv_by_std_in_grpo": True,
 
         # ---- 数据 ----
         "data.train_files": str(train_file),
         "data.val_files": str(val_file),
         "data.train_batch_size": batch_size,
         "data.val_batch_size": 8,
-        "data.max_prompt_length": 1024,
+        "data.max_prompt_length": 1536,
         "data.max_response_length": max_tokens,
         "data.filter_overlong_prompts": True,
         "data.truncation": "error",
+        "data.dataloader_num_workers": 0,
+        "data.seed": seed,
 
         # ---- 模型 ----
         "actor_rollout_ref.model.path": str(model),
         "actor_rollout_ref.model.use_remove_padding": True,
         "actor_rollout_ref.model.enable_gradient_checkpointing": True,
+        "actor_rollout_ref.model.trust_remote_code": False,
+        "actor_rollout_ref.model.lora_rank": 0,
+        "actor_rollout_ref.model.lora.rank": 0,
+        "actor_rollout_ref.model.lora_adapter_path": None,
 
         # ---- actor ----
+        "actor_rollout_ref.actor.strategy": "fsdp",
         "actor_rollout_ref.actor.optim.lr": lr,
         "actor_rollout_ref.actor.ppo_mini_batch_size": batch_size,
         "actor_rollout_ref.actor.ppo_micro_batch_size_per_gpu": micro_batch,
@@ -77,12 +85,22 @@ def build(
         "actor_rollout_ref.actor.kl_loss_type": "low_var_kl",
         "actor_rollout_ref.actor.entropy_coeff": 0.0,
         "actor_rollout_ref.actor.clip_ratio": 0.2,
+        "actor_rollout_ref.actor.clip_ratio_low": 0.2,
+        "actor_rollout_ref.actor.clip_ratio_high": 0.2,
+        "actor_rollout_ref.actor.loss_agg_mode": "seq-mean-token-mean",
+        "actor_rollout_ref.actor.policy_loss.loss_mode": "vanilla",
+        "actor_rollout_ref.actor.ppo_epochs": 1,
+        "actor_rollout_ref.actor.use_torch_compile": False,
+        "actor_rollout_ref.actor.fsdp_config.model_dtype": "bfloat16",
+        "actor_rollout_ref.actor.fsdp_config.dtype": "bfloat16",
+        "actor_rollout_ref.actor.fsdp_config.use_torch_compile": False,
+        "actor_rollout_ref.actor.fsdp_config.seed": seed,
         "actor_rollout_ref.actor.use_dynamic_bsz": False,
 
         # ---- rollout ----
         "actor_rollout_ref.rollout.name": "vllm",
         "actor_rollout_ref.rollout.tensor_model_parallel_size": 1,
-        "actor_rollout_ref.rollout.gpu_memory_utilization": 0.50,
+        "actor_rollout_ref.rollout.gpu_memory_utilization": 0.55,
         "actor_rollout_ref.rollout.n": group_size,
         "actor_rollout_ref.rollout.temperature": temperature,
         "actor_rollout_ref.rollout.top_p": 0.95,
@@ -96,6 +114,8 @@ def build(
         # ---- ref ----
         "actor_rollout_ref.ref.log_prob_micro_batch_size_per_gpu": 2,
         "actor_rollout_ref.ref.fsdp_config.param_offload": False,
+        "actor_rollout_ref.ref.fsdp_config.model_dtype": "bfloat16",
+        "actor_rollout_ref.ref.fsdp_config.use_torch_compile": False,
 
         # ---- 奖励: 自定义函数 + 并行 manager ----
         "reward.custom_reward_function.path": str(ROOT / "code_reward.py"),
@@ -166,9 +186,9 @@ def main():
     ap.add_argument("--lr", type=float, default=1e-6)
     ap.add_argument("--kl-coef", type=float, default=0.001)
     ap.add_argument("--temperature", type=float, default=1.0)
-    ap.add_argument("--max-tokens", type=int, default=1024)
+    ap.add_argument("--max-tokens", type=int, default=2048)
     ap.add_argument("--seed", type=int, default=311)
-    ap.add_argument("--reward-workers", type=int, default=4)
+    ap.add_argument("--reward-workers", type=int, default=2)
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="只打印命令")
     args = ap.parse_args()
