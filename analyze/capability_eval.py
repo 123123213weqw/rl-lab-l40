@@ -6,16 +6,20 @@
 只依赖 vLLM + transformers；数据由 dump_eval_sets.py 预导出。
 greedy 解码，seed=300。
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import argparse
 import json
 import re
 from decimal import Decimal, InvalidOperation
-from pathlib import Path
 
 from transformers import AutoTokenizer
 from vllm import LLM, SamplingParams
 
-DATA = Path(__file__).resolve().parent / "data"
 NUM = re.compile(r"-?\d[\d,]*\.?\d*")
 LETTER = re.compile(r"\b([ABCD])\b")
 

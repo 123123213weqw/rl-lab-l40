@@ -11,12 +11,16 @@ ground_truth 里存的是 {"tests": {"inputs": [...], "outputs": [...]}} 的 JSO
 不走 extra_info 是因为 veRL 的 extra_info 在不同版本间传递不稳定，
 而 reward_model.ground_truth 是稳定契约。
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import argparse
 import hashlib
 import json
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
 
 # 与原 GSM8K baseline 相同的指令风格：要求只给代码
 INSTRUCTION = (

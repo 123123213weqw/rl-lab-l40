@@ -6,13 +6,17 @@
   - 评测指标用「多次采样的平均 pass rate」而非二元 pass@1——
     前者方差低得多，同样的题量能检测更小的改进
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import argparse
 import json
 import math
 from collections import Counter
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
 POOL = ROOT / "data/taco_pool.jsonl"
 
 

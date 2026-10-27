@@ -1,15 +1,26 @@
 """把评测数据导出成 JSONL，使评测端只需要 vLLM，不污染既有 vllm 环境。"""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import json
 import os
-from pathlib import Path
 
 from datasets import load_dataset
 
-R = Path(os.environ.get("GRPO_BASELINE_ROOT", "/path/to/rl-grpo8b-baseline"))
-OUT = Path(__file__).resolve().parent / "data"
-OUT.mkdir(parents=True, exist_ok=True)
 
-INSTR = json.loads((R / "baseline.json").read_text())["prompt_instruction"]
+
+def load_instruction():
+    """延迟读取，避免 import 时就要求 baseline 目录存在。"""
+    base = os.environ.get("GRPO_BASELINE")
+    if not base:
+        raise SystemExit("需要设置 GRPO_BASELINE 指向 baseline 仓库")
+    return json.loads((Path(base) / "baseline.json").read_text())["prompt_instruction"]
+
+
+INSTR = None
 
 
 def strip_instruction(text):
@@ -38,8 +49,8 @@ def arc():
     return rows
 
 
-def gsm_neutral():
-    refs = [json.loads(l) for l in (R / "data/test.jsonl").read_text().split("\n") if l.strip()]
+def gsm_neutral(base):
+    refs = [json.loads(l) for l in (Path(base) / "data/test.jsonl").read_text().split("\n") if l.strip()]
     rows = []
     for r in refs:
         raw = r["prompt"]
@@ -53,9 +64,22 @@ def gsm_neutral():
     return rows
 
 
-for name, rows in (("arc", arc()), ("gsm8k_neutral", gsm_neutral())):
-    p = OUT / f"{name}.jsonl"
-    p.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n")
-    empty = sum(1 for r in rows if len(r["user"]) < 80)
-    print(f"{name}: {len(rows)} 条, 疑似空题 {empty}")
-    print("  样例:", rows[0]["user"][:220].replace("\n", " | "))
+def main():
+    global INSTR
+    import os
+    base = os.environ.get("GRPO_BASELINE")
+    if not base:
+        raise SystemExit("需要设置 GRPO_BASELINE 指向 baseline 仓库")
+    INSTR = load_instruction()
+    DATA.mkdir(parents=True, exist_ok=True)
+
+    for name, rows in (("arc", arc()), ("gsm8k_neutral", gsm_neutral(base))):
+        p = DATA / f"{name}.jsonl"
+        p.write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows) + "\n")
+        empty = sum(1 for r in rows if len(r["user"]) < 80)
+        print(f"{name}: {len(rows)} 条, 疑似空题 {empty}")
+        print("  样例:", rows[0]["user"][:220].replace("\n", " | "))
+
+
+if __name__ == "__main__":
+    main()

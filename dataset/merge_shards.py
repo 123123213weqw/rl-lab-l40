@@ -2,11 +2,15 @@
 
 去重依据是题目 id：分片之间不应重叠，但重跑会产生重复。
 """
-import json
-from collections import Counter
+import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
+import json
+from collections import Counter
+
 
 
 def main():

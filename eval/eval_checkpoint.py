@@ -6,14 +6,18 @@
 
 必须显式传 --no-thinking，否则 Qwen3 会把预算耗在思考上（见 docs/08）。
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import argparse
 import json
 import re
 import statistics
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
 FENCE = re.compile(r"```(?:python3?|py)?[ \t]*\n(.*?)```", re.S)
 INSTRUCTION = (
     "You are an expert competitive programmer. Write a complete Python 3 program "

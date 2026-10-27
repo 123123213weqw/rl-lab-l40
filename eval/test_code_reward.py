@@ -2,12 +2,15 @@
 
 覆盖：正常评分、无代码、坏 tests、语法错误、部分通过、超时、data_source 校验。
 """
-import json
-import os
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
+import json
+import os
+
 sys.path.insert(0, str(ROOT))
 
 SRC = "taco_code"

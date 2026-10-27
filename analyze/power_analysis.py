@@ -4,11 +4,15 @@
   配对比较时题目本身的难度差异会抵消，剩下的方差来自采样噪声。
   每题采 n 次，噪声降到 1/n，等效于把题量放大 n 倍。
 """
-import json
-import math
+import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
+import json
+import math
+
 
 P = ROOT / "data" / "eval_code.jsonl"
 

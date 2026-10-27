@@ -3,14 +3,18 @@
 关键量不是准确率，而是有多少 prompt 落在"有时对有时错"的区间——
 只有这些 prompt 在 GRPO 里能产生非零优势。
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import argparse
 import json
 import os
 import re
 from decimal import Decimal, InvalidOperation
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
 
 R = Path(os.environ.get("GRPO_BASELINE", "/path/to/rl-grpo8b-baseline"))
 NUM = re.compile(r"-?\d[\d,]*\.?\d*")

@@ -7,13 +7,16 @@
   python grade_candidates.py --validated results/taco_validated.json \
       --model <ckpt> --n 8 --limit 400 --out results/code_passrate.json
 """
-import argparse
-import json
-import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
+import argparse
+import json
+import re
+
 
 CACHE = str(ROOT / "hf-cache")
 

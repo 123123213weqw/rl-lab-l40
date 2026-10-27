@@ -25,16 +25,17 @@ compute_score(data_source, solution_str, ground_truth, extra_info=None, **kwargs
 返回 dict：score 是训练用的标量，其余是日志指标。
 """
 
-import json
-import os
-import re
 import sys
 from pathlib import Path
 
-HERE = Path(__file__).resolve().parent
-if str(HERE) not in sys.path:
-    sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
 
+import json
+import os
+import re
+
+# paths 模块已把 sandbox/ 加入 sys.path，这里直接导入即可
 from taco_lib import run_in_sandbox  # noqa: E402
 
 # ---- 可调参数 ----

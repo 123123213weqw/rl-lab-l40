@@ -20,14 +20,17 @@
   CODE_REWARD_MODE=binary python launch_code_grpo.py --steps 50
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import argparse
 import json
 import os
 import subprocess
-import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
 
 # 用环境变量指定，避免把本机路径写进仓库
 #   GRPO_BASELINE=/path/to/grpo-baseline

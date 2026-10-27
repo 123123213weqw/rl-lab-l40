@@ -2,13 +2,17 @@
 
 直接回答：更难的数据到底有没有可学空间，还是只是从"太简单"变成"太难"。
 """
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from paths import ROOT, DATA, RESULTS, DOCS  # noqa: E402
+
 import argparse
 import json
 import re
 from collections import Counter, defaultdict
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
 
 BOX = re.compile(r"\\boxed\s*\{")
 ANS_LINE = re.compile(r"(?:final answer is|answer is|答案是)\s*[:：]?\s*(.+)")
@@ -71,7 +75,6 @@ def correct(pred, gold):
     return 0
 
 
-DATA = ROOT / "data"
 
 
 def build(path, limit_per_level):
