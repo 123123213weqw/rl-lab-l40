@@ -128,7 +128,9 @@ def build(
         "actor_rollout_ref.ref.fsdp_config.use_torch_compile": False,
 
         # ---- 奖励: 自定义函数 + 并行 manager ----
-        "reward.custom_reward_function.path": str(ROOT / "code_reward.py"),
+        # 注意：这是给 veRL 的**路径字符串**，不是 import，
+        # 移动文件时必须同步改这里（reward 模块加载失败会导致奖励恒 0）。
+        "reward.custom_reward_function.path": str(ROOT / "train" / "code_reward.py"),
         "reward.custom_reward_function.name": "compute_score",
         # 这个 veRL 版本走 reward_loop 框架：num_workers 个 RewardLoopWorker
         # 由 asyncio.gather 并发，每个 worker 内部按 chunk 串行跑 run_single。
@@ -208,9 +210,17 @@ def main():
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    for p in (verl_root / ".venv/bin/python", Path(args.model), Path(args.train), Path(args.val)):
+    # 前置校验：任一缺失都会让训练在几十分钟后静默失败或奖励恒为 0
+    reward_mod = ROOT / "train" / "code_reward.py"
+    sandbox_dir = ROOT / "sandbox"
+    for p in (verl_root / ".venv/bin/python", Path(args.model), Path(args.train),
+              Path(args.val), reward_mod):
         if not p.exists():
             sys.exit("缺少: %s" % p)
+    for p in (sandbox_dir / "taco_lib.py", sandbox_dir / "driver.py",
+              sandbox_dir / "sandbox_run.sh"):
+        if not p.exists():
+            sys.exit("沙箱文件缺失: %s（奖励会在运行时抛错，导致奖励恒 0）" % p)
 
     cmd, env = build(
         verl_root, Path(args.model), Path(args.train), Path(args.val), out,
